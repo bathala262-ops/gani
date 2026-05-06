@@ -3,416 +3,493 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Parakeet AI</title>
+<title>Angel — Invisible AI</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&display=swap');
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --glass-bg: rgba(8, 12, 20, 0.82);
-    --glass-border: rgba(100, 220, 255, 0.18);
-    --glass-blur: blur(28px) saturate(1.6);
-    --accent: #00e5ff;
-    --accent2: #7c3aed;
-    --accent3: #10b981;
-    --text: #e2f4ff;
-    --text-dim: rgba(180, 220, 255, 0.5);
-    --danger: #ff4d6d;
-    --glow: 0 0 24px rgba(0,229,255,0.18);
-    --radius: 16px;
-  }
+:root {
+  --bg: #0a0a0b;
+  --surface: rgba(16, 16, 18, 0.94);
+  --surface2: rgba(22, 22, 26, 0.9);
+  --border: rgba(255,255,255,0.07);
+  --border-active: rgba(255,255,255,0.14);
+  --text: #f0f0f2;
+  --text-2: rgba(240,240,242,0.5);
+  --text-3: rgba(240,240,242,0.28);
+  --green: #4ade80;
+  --green-dim: rgba(74,222,128,0.15);
+  --red: #f87171;
+  --amber: #fbbf24;
+  --blue: #60a5fa;
+  --accent: #a78bfa;
+  --radius: 10px;
+}
 
-  body {
-    background: #040810;
-    font-family: 'Syne', sans-serif;
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-  }
+html, body {
+  width: 100%; height: 100%;
+  background: transparent;
+  font-family: 'Geist', sans-serif;
+  color: var(--text);
+  overflow: hidden;
+}
 
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    animation: gridShift 20s linear infinite;
-    pointer-events: none; z-index: 0;
-  }
-  body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 60% 40%, rgba(124,58,237,0.10) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 40% at 20% 80%, rgba(0,229,255,0.07) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
-  }
-  @keyframes gridShift { 100% { background-position: 48px 48px, 48px 48px; } }
+/* ═══════════════════════════════════════
+   SCREEN-SHARE INVISIBLE TECHNIQUE
+   The panel uses CSS `mix-blend-mode` tricks
+   and `pointer-events: none` fallback.
+   Primary stealth: window blur = hide.
+   Secondary: manual toggle.
+═══════════════════════════════════════ */
 
-  /* ══════════════════════════════════
-     STEALTH MODE — invisible to screen share
-     Uses a special CSS trick: when the
-     window loses focus (presenter shares
-     screen), the overlay hides itself.
-     Toggled by Ctrl+Shift+S
-  ══════════════════════════════════ */
-  body.stealth-mode #overlay {
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-  /* Also hide when window loses focus in stealth */
-  body.stealth-mode:not(:focus-within) #overlay {
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
+body { background: #0a0a0b; }
 
-  /* ── OVERLAY — FLOATING PANEL ── */
-  #overlay {
-    position: fixed;
-    top: 60px;
-    right: 20px;
-    width: min(420px, 96vw);
-    max-height: 85vh;
-    display: flex; flex-direction: column;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: var(--radius);
-    box-shadow: var(--glow), 0 32px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07);
-    z-index: 9999;
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    overflow: hidden;
-    resize: both;
-    min-width: 300px;
-    min-height: 280px;
-  }
-  #overlay.hidden {
-    opacity: 0; pointer-events: none;
-    transform: scale(0.97) translateY(-8px);
-  }
+/* ── MAIN PANEL ── */
+#panel {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 24px 64px rgba(0,0,0,0.8),
+    0 1px 0 rgba(255,255,255,0.06) inset;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 9999;
+  max-height: calc(100vh - 48px);
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+}
+#panel.hide {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.98);
+}
 
-  /* Stealth indicator badge */
-  #stealthBadge {
-    position: fixed;
-    top: 8px; right: 20px;
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: rgba(255,77,109,0.15);
-    border: 1px solid rgba(255,77,109,0.3);
-    color: var(--danger);
-    letter-spacing: 0.08em;
-    z-index: 10000;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    opacity: 0;
-  }
-  #stealthBadge.on { opacity: 1; }
+/* ── TOPBAR ── */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: move;
+  user-select: none;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.02);
+}
+.logo {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  flex: 1;
+}
+.logo span { color: var(--accent); }
 
-  /* ── TITLEBAR ── */
-  #titlebar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 14px 10px;
-    border-bottom: 1px solid var(--glass-border);
-    cursor: move; user-select: none; flex-shrink: 0;
-    background: rgba(0,0,0,0.2);
-  }
-  .bird { font-size: 18px; filter: drop-shadow(0 0 6px var(--accent)); }
-  #titlebar h1 {
-    font-size: 12px; font-weight: 800;
-    letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--accent); text-shadow: 0 0 12px rgba(0,229,255,0.4); flex: 1;
-  }
-  .kbd {
-    font-family: 'Space Mono', monospace; font-size: 9px; color: var(--text-dim);
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 5px; padding: 2px 6px; letter-spacing: 0.04em; white-space: nowrap;
-  }
-  .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--accent3); box-shadow: 0 0 8px var(--accent3);
-    animation: pulse 2s ease-in-out infinite; flex-shrink: 0;
-  }
-  .dot.listening { background: var(--danger); box-shadow: 0 0 10px var(--danger); animation: fast 0.6s ease-in-out infinite; }
-  .dot.thinking  { background: var(--accent2); box-shadow: 0 0 10px var(--accent2); animation: fast 0.8s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  @keyframes fast  { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.pill-btn {
+  display: flex; align-items: center; gap: 4px;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 3px 8px; border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text-2); cursor: pointer;
+  transition: all 0.14s; white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.pill-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--border-active); color: var(--text); }
+.pill-btn.active { background: var(--green-dim); border-color: rgba(74,222,128,0.3); color: var(--green); }
+.pill-btn.red { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.25); color: var(--red); }
 
-  /* Title action buttons */
-  .title-btn {
-    width: 22px; height: 22px; border-radius: 6px;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-    color: var(--text-dim); cursor: pointer; font-size: 11px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; flex-shrink: 0;
-  }
-  .title-btn:hover { background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.3); color: var(--accent); }
-  .title-btn.danger:hover { background: rgba(255,77,109,0.1); border-color: rgba(255,77,109,0.3); color: var(--danger); }
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+  box-shadow: 0 0 6px var(--green);
+  animation: breathe 3s ease-in-out infinite;
+}
+.status-dot.thinking { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: fast-pulse 0.7s ease-in-out infinite; }
+.status-dot.listening { background: var(--red); box-shadow: 0 0 8px var(--red); animation: fast-pulse 0.5s ease-in-out infinite; }
+.status-dot.off { background: var(--text-3); box-shadow: none; animation: none; }
 
-  /* ── CHAT ── */
-  #chat {
-    flex: 1; overflow-y: auto;
-    padding: 12px 14px;
-    display: flex; flex-direction: column; gap: 10px;
-    min-height: 180px;
-    scrollbar-width: thin; scrollbar-color: rgba(0,229,255,0.2) transparent;
-  }
-  #chat::-webkit-scrollbar { width: 3px; }
-  #chat::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 4px; }
+@keyframes breathe { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+@keyframes fast-pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  .msg { display: flex; flex-direction: column; gap: 3px; animation: msgIn 0.2s cubic-bezier(.4,0,.2,1); }
-  @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-  .msg.user { align-items: flex-end; }
-  .msg.ai   { align-items: flex-start; }
+/* ── CONTEXT BAR ── */
+#contextBar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#contextBar::-webkit-scrollbar { display: none; }
+.ctx-tag {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 2px 8px; border-radius: 4px;
+  white-space: nowrap; cursor: pointer;
+  border: 1px solid var(--border);
+  color: var(--text-3); transition: all 0.12s; flex-shrink: 0;
+  background: transparent;
+}
+.ctx-tag.on {
+  background: rgba(167,139,250,0.12);
+  border-color: rgba(167,139,250,0.3);
+  color: var(--accent);
+}
+.ctx-tag:hover:not(.on) { color: var(--text-2); border-color: var(--border-active); }
+#ctxLabel {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--text-3); margin-right: 2px; flex-shrink: 0;
+}
 
-  .lbl {
-    font-size: 9px; font-weight: 600;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--text-dim); padding: 0 4px;
-  }
-  .msg.user .lbl { color: rgba(0,229,255,0.5); }
-  .msg.ai   .lbl { color: rgba(124,58,237,0.7); }
+/* ── MESSAGES ── */
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 12px;
+  min-height: 120px;
+  max-height: 340px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+#messages::-webkit-scrollbar { width: 3px; }
+#messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
 
-  .bubble {
-    max-width: 92%; padding: 9px 13px;
-    border-radius: 11px; font-size: 13px; line-height: 1.65; word-break: break-word;
-  }
-  .msg.user .bubble {
-    background: rgba(0,229,255,0.10);
-    border: 1px solid rgba(0,229,255,0.18); border-bottom-right-radius: 3px;
-  }
-  .msg.ai .bubble {
-    background: rgba(124,58,237,0.12);
-    border: 1px solid rgba(124,58,237,0.2); border-bottom-left-radius: 3px;
-    font-family: 'Space Mono', monospace; font-size: 12px;
-  }
+/* Empty state */
+#emptyState {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 24px 16px; text-align: center; flex: 1;
+}
+#emptyState .angel-icon {
+  font-family: 'Instrument Serif', serif; font-style: italic;
+  font-size: 32px; color: var(--accent); opacity: 0.6;
+  text-shadow: 0 0 20px rgba(167,139,250,0.4);
+}
+#emptyState p {
+  font-size: 12px; color: var(--text-3); line-height: 1.7;
+  font-family: 'DM Mono', monospace;
+}
+#emptyState .hint {
+  font-size: 10px; color: var(--text-3);
+  font-family: 'DM Mono', monospace; letter-spacing: 0.04em;
+}
+.hint-key {
+  display: inline-block;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  border-radius: 3px; padding: 1px 5px;
+  font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-2);
+}
 
-  /* Streaming cursor */
-  .bubble.streaming::after {
-    content: '▋';
-    display: inline;
-    color: var(--accent2);
-    animation: blink 0.6s step-start infinite;
-    margin-left: 2px;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+/* Message rows */
+.row { display: flex; flex-direction: column; gap: 3px; animation: fadeUp 0.2s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
 
-  /* Empty */
-  .empty {
-    flex:1; display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    gap:8px; color:var(--text-dim); padding:20px; text-align:center;
-  }
-  .empty .icon { font-size:32px; opacity: 0.4; }
-  .empty p { font-size:11px; line-height:1.7; }
-  .empty code {
-    font-family:'Space Mono',monospace; font-size:10px; color:rgba(0,229,255,0.4);
-  }
+.row.user { align-items: flex-end; }
+.row.ai   { align-items: flex-start; }
 
-  /* Markdown */
-  .bubble code {
-    background:rgba(0,0,0,0.3); border-radius:4px;
-    padding:1px 4px; font-family:'Space Mono',monospace;
-    font-size:11px; color:var(--accent);
-  }
-  .bubble pre {
-    background:rgba(0,0,0,0.3); border-radius:7px;
-    padding:8px; margin:5px 0; overflow-x:auto;
-  }
-  .bubble pre code { padding:0; background:none; }
-  .bubble strong { color:var(--accent); font-weight:700; }
-  .bubble em { color:rgba(200,230,255,0.8); }
+.row-label {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--text-3); padding: 0 2px; letter-spacing: 0.06em;
+}
+.row.user .row-label { color: rgba(96,165,250,0.5); }
+.row.ai .row-label   { color: rgba(167,139,250,0.5); }
 
-  /* ── INPUT AREA ── */
-  #inputArea {
-    border-top: 1px solid var(--glass-border);
-    padding: 10px 12px; display: flex;
-    flex-direction: column; gap: 8px; flex-shrink: 0;
-    background: rgba(0,0,0,0.15);
-  }
-  #toolbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-  .chip {
-    font-family:'Space Mono',monospace; font-size: 9px;
-    padding:3px 8px; border-radius:20px;
-    background:rgba(255,255,255,0.04); border:1px solid var(--glass-border);
-    color:var(--text-dim); cursor:pointer; transition:all 0.15s; letter-spacing:0.03em;
-  }
-  .chip:hover { background:rgba(0,229,255,0.08); border-color:rgba(0,229,255,0.3); color:var(--accent); }
-  .chip.on { background:rgba(0,229,255,0.12); border-color:var(--accent); color:var(--accent); }
-  #statusText {
-    margin-left:auto; font-family:'Space Mono',monospace;
-    font-size:9px; color:var(--text-dim); letter-spacing:0.04em;
-  }
+.bubble {
+  max-width: 93%; padding: 9px 12px;
+  border-radius: 9px; font-size: 12.5px;
+  line-height: 1.7; word-break: break-word;
+}
+.row.user .bubble {
+  background: rgba(96,165,250,0.08);
+  border: 1px solid rgba(96,165,250,0.14);
+  border-bottom-right-radius: 3px;
+  font-family: 'Geist', sans-serif; font-weight: 300;
+  color: rgba(240,240,242,0.85);
+}
+.row.ai .bubble {
+  background: rgba(167,139,250,0.07);
+  border: 1px solid rgba(167,139,250,0.14);
+  border-bottom-left-radius: 3px;
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  color: var(--text);
+}
 
-  #inputRow { display:flex; gap:6px; align-items:flex-end; }
-  #qInput {
-    flex:1; background:rgba(255,255,255,0.05);
-    border:1px solid var(--glass-border); border-radius:9px;
-    color:var(--text); font-family:'Syne',sans-serif;
-    font-size:13px; padding:9px 12px; resize:none; outline:none;
-    min-height:38px; max-height:100px;
-    transition:border-color 0.2s, box-shadow 0.2s; line-height:1.5;
-  }
-  #qInput:focus { border-color:rgba(0,229,255,0.4); box-shadow:0 0 0 2px rgba(0,229,255,0.07); }
-  #qInput::placeholder { color:var(--text-dim); }
+/* Streaming cursor */
+.bubble.streaming::after {
+  content: '▊';
+  color: var(--accent);
+  animation: cur 0.55s step-start infinite;
+  font-size: 11px; margin-left: 1px;
+}
+@keyframes cur { 0%,100%{opacity:1} 50%{opacity:0} }
 
-  .btn {
-    border:none; cursor:pointer; border-radius:9px;
-    font-family:'Syne',sans-serif; font-weight:700;
-    transition:all 0.18s; display:flex;
-    align-items:center; justify-content:center; gap:5px; flex-shrink:0;
-  }
-  #micBtn {
-    width:38px; height:38px; font-size:16px;
-    background:rgba(255,77,109,0.10); border:1px solid rgba(255,77,109,0.25); color:var(--danger);
-  }
-  #micBtn:hover { background:rgba(255,77,109,0.20); }
-  #micBtn.on {
-    background:var(--danger); color:#fff;
-    box-shadow:0 0 16px rgba(255,77,109,0.5);
-    animation:micPulse 0.8s ease-in-out infinite;
-  }
-  @keyframes micPulse{0%,100%{box-shadow:0 0 16px rgba(255,77,109,0.5)}50%{box-shadow:0 0 28px rgba(255,77,109,0.8)}}
+/* Markdown */
+.bubble strong { color: #c4b5fd; font-weight: 500; }
+.bubble em { color: rgba(240,240,242,0.7); font-style: italic; }
+.bubble code {
+  background: rgba(0,0,0,0.4); border-radius: 4px;
+  padding: 1px 5px; font-family: 'DM Mono', monospace;
+  font-size: 11px; color: #86efac; border: 1px solid rgba(255,255,255,0.06);
+}
+.bubble pre {
+  background: rgba(0,0,0,0.4); border-radius: 7px;
+  padding: 10px; margin: 6px 0; overflow-x: auto;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.bubble pre code { padding:0; background:none; border: none; }
+.bubble ul, .bubble ol { padding-left: 16px; }
+.bubble li { margin: 2px 0; }
+.bubble h3 { color: var(--accent); font-size: 13px; margin: 6px 0 3px; }
+.bubble p + p { margin-top: 6px; }
+.bubble hr { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
 
-  #sendBtn {
-    padding:0 14px; height:38px; font-size:11px; letter-spacing:0.06em;
-    background:linear-gradient(135deg, var(--accent2), var(--accent));
-    color:#fff; box-shadow:0 4px 16px rgba(0,229,255,0.2);
-  }
-  #sendBtn:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,229,255,0.3); }
-  #sendBtn:disabled { opacity:0.4; cursor:not-allowed; }
+/* ── INPUT ZONE ── */
+#inputZone {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.2);
+}
 
-  /* ── KEY PANEL ── */
-  #keyPanel {
-    position:absolute; inset:0; border-radius:var(--radius);
-    background:rgba(8,12,20,0.95);
-    backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    gap:14px; padding:28px; z-index:10; transition:opacity 0.4s;
-  }
-  #keyPanel h2 {
-    font-size:18px; font-weight:800; color:var(--accent);
-    text-shadow:0 0 16px rgba(0,229,255,0.4); letter-spacing:0.08em;
-  }
-  #keyPanel p { font-size:12px; color:var(--text-dim); text-align:center; max-width:300px; line-height:1.6; }
-  #keyPanel a { color:var(--accent); text-decoration:none; }
-  #keyPanel a:hover { text-decoration:underline; }
+/* Model selector row */
+#modelRow {
+  display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; overflow-x: auto;
+  scrollbar-width: none;
+}
+#modelRow::-webkit-scrollbar { display: none; }
+.m-chip {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  padding: 2px 7px; border-radius: 3px;
+  border: 1px solid var(--border);
+  color: var(--text-3); cursor: pointer; transition: all 0.13s;
+  white-space: nowrap; flex-shrink: 0; background: transparent;
+}
+.m-chip:hover { color: var(--text-2); border-color: var(--border-active); }
+.m-chip.on { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.3); color: var(--accent); }
+#statusLabel {
+  margin-left: auto; font-family: 'DM Mono', monospace;
+  font-size: 9px; color: var(--text-3); flex-shrink: 0; letter-spacing: 0.03em;
+}
 
-  #apiKeyInput {
-    width:100%;
-    background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
-    border-radius:9px; color:var(--text); font-family:'Space Mono',monospace;
-    font-size:12px; padding:10px 14px; outline:none;
-    transition:border-color 0.2s; letter-spacing:0.04em;
-  }
-  #apiKeyInput:focus { border-color:rgba(0,229,255,0.4); }
+/* Text input row */
+#inputRow { display: flex; gap: 6px; align-items: flex-end; }
+#qInput {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Geist', sans-serif; font-weight: 300;
+  font-size: 12.5px; padding: 8px 11px;
+  resize: none; outline: none;
+  min-height: 36px; max-height: 90px;
+  transition: border-color 0.15s;
+  line-height: 1.5;
+}
+#qInput:focus { border-color: rgba(167,139,250,0.3); }
+#qInput::placeholder { color: var(--text-3); }
 
-  #saveKeyBtn {
-    width:100%; padding:11px;
-    background:linear-gradient(135deg, var(--accent2), var(--accent));
-    border:none; border-radius:9px; color:#fff;
-    font-family:'Syne',sans-serif; font-weight:800;
-    font-size:13px; cursor:pointer; letter-spacing:0.08em; transition:all 0.18s;
-  }
-  #saveKeyBtn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,229,255,0.25); }
-  #keyErr { font-size:11px; color:var(--danger); font-family:'Space Mono',monospace; min-height:16px; }
+#micBtn {
+  width: 36px; height: 36px; border-radius: 8px; border: none; cursor: pointer;
+  background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.18);
+  color: var(--red); font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.14s; flex-shrink: 0;
+}
+#micBtn:hover { background: rgba(248,113,113,0.16); }
+#micBtn.on {
+  background: var(--red); color: white;
+  box-shadow: 0 0 14px rgba(248,113,113,0.4);
+  animation: mic-glow 0.7s ease-in-out infinite;
+}
+@keyframes mic-glow { 0%,100%{box-shadow:0 0 14px rgba(248,113,113,0.4)} 50%{box-shadow:0 0 24px rgba(248,113,113,0.7)} }
 
-  /* ── TOAST ── */
-  #toast {
-    position:fixed; bottom:16px; left:50%;
-    transform:translateX(-50%) translateY(6px);
-    background:rgba(8,12,20,0.96); border:1px solid var(--glass-border);
-    border-radius:20px; font-family:'Space Mono',monospace;
-    font-size:10px; color:var(--text); padding:5px 16px;
-    opacity:0; transition:all 0.22s;
-    pointer-events:none; white-space:nowrap; z-index:10001;
-  }
-  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#sendBtn {
+  height: 36px; padding: 0 14px; border: none; cursor: pointer;
+  background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.25);
+  border-radius: 8px; color: var(--accent);
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.05em;
+  transition: all 0.14s; flex-shrink: 0;
+}
+#sendBtn:hover:not(:disabled) { background: rgba(167,139,250,0.22); border-color: rgba(167,139,250,0.4); }
+#sendBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  /* ── RESIZE HANDLE indicator ── */
-  #overlay::after {
-    content: '⠿';
-    position: absolute; bottom: 4px; right: 6px;
-    font-size: 10px; color: var(--text-dim); opacity: 0.3;
-    pointer-events: none;
-  }
+/* ── HOTKEY BAR ── */
+#hotkeyBar {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  padding: 6px 14px 7px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.hk {
+  display: flex; align-items: center; gap: 3px;
+  font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-3);
+}
+.hk kbd {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 3px; padding: 1px 4px; font-family: inherit; font-size: 8px;
+  color: var(--text-2); letter-spacing: 0.02em;
+}
+.hk-sep { width: 1px; height: 10px; background: var(--border); margin: 0 4px; }
 
-  /* Opacity slider */
-  #opacitySlider {
-    -webkit-appearance: none; appearance: none;
-    width: 60px; height: 3px; border-radius: 2px;
-    background: rgba(255,255,255,0.1); outline: none; cursor: pointer;
-  }
-  #opacitySlider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 10px; height: 10px;
-    border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 6px var(--accent);
-  }
+/* ── API KEY SCREEN ── */
+#keyScreen {
+  position: absolute; inset: 0; border-radius: 14px;
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; padding: 28px; z-index: 20;
+  transition: opacity 0.35s;
+}
+.key-logo {
+  font-family: 'Instrument Serif', serif; font-style: italic;
+  font-size: 28px; color: var(--text);
+  letter-spacing: -0.02em; text-align: center;
+}
+.key-logo span { color: var(--accent); }
+#keyScreen p {
+  font-size: 12px; color: var(--text-2); text-align: center;
+  line-height: 1.7; font-family: 'DM Mono', monospace; max-width: 300px;
+}
+#keyScreen a { color: var(--accent); text-decoration: none; }
+#apiKeyInput {
+  width: 100%;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  padding: 10px 13px; outline: none; transition: border-color 0.15s;
+  letter-spacing: 0.04em;
+}
+#apiKeyInput:focus { border-color: rgba(167,139,250,0.4); }
+#keyErr { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--red); min-height: 16px; }
+#saveKeyBtn {
+  width: 100%; padding: 10px; border: none; cursor: pointer;
+  background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 8px; color: var(--accent);
+  font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em;
+  transition: all 0.15s;
+}
+#saveKeyBtn:hover { background: rgba(167,139,250,0.25); }
+
+/* ── STEALTH INDICATOR (tiny, always visible to user) ── */
+#stealthIndicator {
+  position: fixed; top: 6px; right: 6px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-3);
+  z-index: 10001; pointer-events: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+#stealthIndicator.stealth-on {
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: fast-pulse 0.9s ease-in-out infinite;
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 14px; left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: rgba(16,16,18,0.96); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 14px;
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-2);
+  opacity: 0; transition: all 0.2s; pointer-events: none;
+  white-space: nowrap; z-index: 10002; letter-spacing: 0.03em;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Opacity ghost mode */
+#panel.ghost { opacity: 0.15 !important; }
 </style>
 </head>
 <body>
 
-<!-- STEALTH BADGE -->
-<div id="stealthBadge">👁 STEALTH ON</div>
+<div id="stealthIndicator"></div>
 
-<div id="overlay">
+<div id="panel">
 
-  <!-- API KEY PANEL -->
-  <div id="keyPanel">
-    <div style="font-size:44px">🦜</div>
-    <h2>PARAKEET AI</h2>
-    <p>Enter your <strong>Groq API key</strong> to activate.<br>
-    Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a></p>
-    <input id="apiKeyInput" type="password" placeholder="gsk_••••••••••••••••••••••••" autocomplete="off" spellcheck="false"/>
+  <!-- KEY SCREEN -->
+  <div id="keyScreen">
+    <div class="key-logo"><span>Angel</span></div>
+    <p>Your invisible AI co-pilot.<br>Enter your <strong>Groq API key</strong> to begin.<br>
+    Get one free at <a href="https://console.groq.com" target="_blank">console.groq.com</a></p>
+    <input id="apiKeyInput" type="password" placeholder="gsk_••••••••••••••••••••••" autocomplete="off" spellcheck="false"/>
     <div id="keyErr"></div>
-    <button id="saveKeyBtn">⚡ ACTIVATE PARAKEET</button>
-    <p style="font-size:10px;margin-top:-6px">Key saved in your browser for next time.</p>
+    <button id="saveKeyBtn">activate angel →</button>
+    <p style="font-size:10px;color:var(--text-3)">Stored locally. Never sent anywhere except Groq.</p>
   </div>
 
-  <!-- TITLEBAR -->
-  <div id="titlebar">
-    <span class="bird">🦜</span>
-    <h1>Parakeet AI</h1>
-    <!-- Opacity slider -->
-    <input type="range" id="opacitySlider" min="10" max="100" value="100" title="Opacity">
-    <button class="title-btn" id="stealthBtn" title="Toggle Stealth Mode (Ctrl+Shift+S)">👁</button>
-    <button class="title-btn danger" id="clearBtn" title="Clear Chat (Ctrl+Shift+C)">🗑</button>
-    <span class="kbd">⌃⇧H hide</span>
-    <div class="dot" id="dot"></div>
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <span class="logo"><span>Angel</span></span>
+    <button class="pill-btn" id="stealthBtn" title="Stealth mode (Ctrl+Shift+S)">
+      <span id="stealthBtnIcon">○</span> stealth
+    </button>
+    <button class="pill-btn" id="ghostBtn" title="Ghost opacity (Ctrl+Shift+G)">ghost</button>
+    <button class="pill-btn red" id="clearBtn">clear</button>
+    <div class="status-dot" id="statusDot"></div>
   </div>
 
-  <!-- CHAT -->
-  <div id="chat">
-    <div class="empty" id="empty">
-      <div class="icon">🦜</div>
-      <p>Streaming answers, voice input, stealth mode.<br>
-      <code>Ctrl+Shift+S</code> stealth &nbsp;·&nbsp; <code>Ctrl+Shift+H</code> hide<br>
-      <code>Ctrl+Enter</code> send &nbsp;·&nbsp; <code>🎙️</code> voice</p>
+  <!-- CONTEXT TAGS -->
+  <div id="contextBar">
+    <span id="ctxLabel">ctx:</span>
+    <span class="ctx-tag on" data-ctx="general">general</span>
+    <span class="ctx-tag" data-ctx="interview">interview</span>
+    <span class="ctx-tag" data-ctx="coding">coding</span>
+    <span class="ctx-tag" data-ctx="system design">system design</span>
+    <span class="ctx-tag" data-ctx="behavioral">behavioral</span>
+    <span class="ctx-tag" data-ctx="math">math</span>
+  </div>
+
+  <!-- MESSAGES -->
+  <div id="messages">
+    <div id="emptyState">
+      <div class="angel-icon">Angel</div>
+      <p>invisible. always listening.<br>ready when you need it.</p>
+      <div class="hint">
+        <span class="hint-key">Ctrl+Shift+S</span> stealth &nbsp;
+        <span class="hint-key">Ctrl+Shift+H</span> hide &nbsp;
+        <span class="hint-key">Ctrl+Enter</span> send
+      </div>
     </div>
   </div>
 
   <!-- INPUT -->
-  <div id="inputArea">
-    <div id="toolbar">
-      <span class="chip on" data-m="llama-3.3-70b-versatile">llama-3.3-70b</span>
-      <span class="chip" data-m="mixtral-8x7b-32768">mixtral-8x7b</span>
-      <span class="chip" data-m="gemma2-9b-it">gemma2-9b</span>
-      <span id="statusText">READY</span>
+  <div id="inputZone">
+    <div id="modelRow">
+      <span class="m-chip on" data-m="llama-3.3-70b-versatile">llama-3.3-70b</span>
+      <span class="m-chip" data-m="mixtral-8x7b-32768">mixtral-8x7b</span>
+      <span class="m-chip" data-m="gemma2-9b-it">gemma2-9b</span>
+      <span id="statusLabel">ready</span>
     </div>
     <div id="inputRow">
-      <textarea id="qInput" placeholder="Ask anything… (Ctrl+Enter)" rows="1"></textarea>
-      <button class="btn" id="micBtn" title="Voice input">🎙️</button>
-      <button class="btn" id="sendBtn">SEND ➤</button>
+      <textarea id="qInput" placeholder="ask anything…" rows="1"></textarea>
+      <button id="micBtn" title="Voice (click to toggle)">🎙</button>
+      <button id="sendBtn">send</button>
     </div>
+  </div>
+
+  <!-- HOTKEY BAR -->
+  <div id="hotkeyBar">
+    <div class="hk"><kbd>⌃⇧H</kbd> hide</div>
+    <div class="hk-sep"></div>
+    <div class="hk"><kbd>⌃⇧S</kbd> stealth</div>
+    <div class="hk-sep"></div>
+    <div class="hk"><kbd>⌃⇧G</kbd> ghost</div>
+    <div class="hk-sep"></div>
+    <div class="hk"><kbd>⌃↩</kbd> send</div>
+    <div class="hk-sep"></div>
+    <div class="hk"><kbd>⌃⇧C</kbd> clear</div>
   </div>
 
 </div>
@@ -420,152 +497,184 @@
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════
-//  PARAKEET AI — Enhanced
-//  ✦ Streaming responses (token by token)
-//  ✦ Floating draggable resizable panel
-//  ✦ Stealth mode (invisible during screen share)
-//  ✦ Opacity control
-//  ✦ Groq API · Speech · Auto-send
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  ANGEL — Invisible AI Desktop Overlay
+//
+//  STEALTH SYSTEM (3 layers):
+//  1. Window-blur hide: panel vanishes the
+//     instant focus leaves this window.
+//     Screen-share captures the OS, but by
+//     the time you share, focus has left.
+//  2. Manual toggle Ctrl+Shift+S
+//  3. Ghost mode: panel at 15% opacity —
+//     barely visible, nearly transparent.
+//
+//  STREAMING: token-by-token via Groq SSE
+//  CONTEXT: pre-prompts per context tag
+// ═══════════════════════════════════════════
 
-const STORAGE_KEY = 'parakeet_groq_key';
+const STORE = 'angel_groq_key';
+const CONTEXTS = {
+  general:       'You are Angel, a sharp invisible AI assistant. Be concise and precise. Use markdown.',
+  interview:     'You are Angel, an expert interview coach. Give concise, structured answers to interview questions. Highlight key points. Format clearly.',
+  coding:        'You are Angel, a senior software engineer. Give working code with brief explanations. Use markdown code blocks. Be precise.',
+  'system design': 'You are Angel, a staff-level system design expert. Give structured, scalable design answers with components, trade-offs, and diagrams in text.',
+  behavioral:    'You are Angel, an expert at behavioral interview answers. Use STAR format (Situation, Task, Action, Result). Be specific and compelling.',
+  math:          'You are Angel, a math expert. Show step-by-step solutions clearly. Use proper notation in plain text.'
+};
 
-let groqKey = localStorage.getItem(STORAGE_KEY) || '';
-let model   = 'llama-3.3-70b-versatile';
-let history = [];
-let busy    = false;
-let recog   = null;
+let groqKey   = localStorage.getItem(STORE) || '';
+let model     = 'llama-3.3-70b-versatile';
+let context   = 'general';
+let history   = [];
+let busy      = false;
+let visible   = true;
+let stealthOn = false;
+let ghostOn   = false;
 let listening = false;
+let recog     = null;
 let autoTimer = null;
-const AUTO_DELAY = 1800;
-let overlayVisible = true;
-let stealthMode = false;
+const AUTO_MS = 1700;
 
 // Elements
-const overlay      = document.getElementById('overlay');
-const keyPanel     = document.getElementById('keyPanel');
-const apiKeyInput  = document.getElementById('apiKeyInput');
-const saveKeyBtn   = document.getElementById('saveKeyBtn');
-const keyErr       = document.getElementById('keyErr');
-const chat         = document.getElementById('chat');
-const empty        = document.getElementById('empty');
-const qInput       = document.getElementById('qInput');
-const micBtn       = document.getElementById('micBtn');
-const sendBtn      = document.getElementById('sendBtn');
-const dot          = document.getElementById('dot');
-const statusText   = document.getElementById('statusText');
-const toast        = document.getElementById('toast');
-const stealthBtn   = document.getElementById('stealthBtn');
-const clearBtn     = document.getElementById('clearBtn');
-const stealthBadge = document.getElementById('stealthBadge');
-const opacitySlider= document.getElementById('opacitySlider');
+const panel         = document.getElementById('panel');
+const keyScreen     = document.getElementById('keyScreen');
+const apiKeyInput   = document.getElementById('apiKeyInput');
+const saveKeyBtn    = document.getElementById('saveKeyBtn');
+const keyErr        = document.getElementById('keyErr');
+const messages      = document.getElementById('messages');
+const emptyState    = document.getElementById('emptyState');
+const qInput        = document.getElementById('qInput');
+const micBtn        = document.getElementById('micBtn');
+const sendBtn       = document.getElementById('sendBtn');
+const statusDot     = document.getElementById('statusDot');
+const statusLabel   = document.getElementById('statusLabel');
+const stealthBtn    = document.getElementById('stealthBtn');
+const stealthBtnIcon= document.getElementById('stealthBtnIcon');
+const ghostBtn      = document.getElementById('ghostBtn');
+const clearBtn      = document.getElementById('clearBtn');
+const stealthInd    = document.getElementById('stealthIndicator');
+const toast         = document.getElementById('toast');
 
-// Auto-load saved key
-if (groqKey) {
-  keyPanel.style.opacity = '0';
-  setTimeout(() => keyPanel.style.display = 'none', 10);
-  showToast('🦜 Welcome back!');
-}
+// Init
+if (groqKey) hideKeyScreen();
 
-// ── KEY PANEL ──
-saveKeyBtn.addEventListener('click', activateKey);
-apiKeyInput.addEventListener('keydown', e => { if(e.key==='Enter') activateKey(); });
+// ── KEY SCREEN ──
+saveKeyBtn.addEventListener('click', tryActivate);
+apiKeyInput.addEventListener('keydown', e => e.key === 'Enter' && tryActivate());
 
-function activateKey() {
+function tryActivate() {
   const k = apiKeyInput.value.trim();
   if (!k.startsWith('gsk_') || k.length < 20) {
-    keyErr.textContent = '✗ Invalid key — should start with gsk_'; return;
+    keyErr.textContent = '✗ must start with gsk_ and be valid'; return;
   }
   groqKey = k;
-  localStorage.setItem(STORAGE_KEY, k);
-  keyPanel.style.transition = 'opacity 0.4s';
-  keyPanel.style.opacity = '0';
-  setTimeout(() => keyPanel.style.display = 'none', 400);
-  showToast('🦜 Parakeet activated!');
+  localStorage.setItem(STORE, k);
+  hideKeyScreen();
+  toast_show('angel activated');
+}
+function hideKeyScreen() {
+  keyScreen.style.opacity = '0';
+  setTimeout(() => keyScreen.style.display = 'none', 350);
 }
 
-// ── MODEL CHIPS ──
-document.querySelectorAll('.chip[data-m]').forEach(c => {
-  c.addEventListener('click', () => {
-    document.querySelectorAll('.chip[data-m]').forEach(x => x.classList.remove('on'));
-    c.classList.add('on');
-    model = c.dataset.m;
-    showToast(`Model → ${model}`);
+// ── CONTEXT TAGS ──
+document.querySelectorAll('.ctx-tag').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.ctx-tag').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    context = t.dataset.ctx;
+    toast_show(`context → ${context}`);
   });
 });
 
-// ── OPACITY SLIDER ──
-opacitySlider.addEventListener('input', () => {
-  overlay.style.opacity = (opacitySlider.value / 100).toString();
+// ── MODEL CHIPS ──
+document.querySelectorAll('.m-chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.m-chip').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+    model = c.dataset.m;
+    toast_show(`model → ${model.split('-').slice(0,2).join('-')}`);
+  });
 });
 
 // ── STATUS ──
 function setStatus(s) {
-  dot.className = 'dot' + (s==='listening'?' listening': s==='thinking'?' thinking':'');
-  statusText.textContent = s==='listening' ? '● LISTENING…' : s==='thinking' ? '◌ THINKING…' : 'READY';
+  statusDot.className = 'status-dot' + (s==='thinking'?' thinking':s==='listening'?' listening':s==='off'?' off':'');
+  statusLabel.textContent = s;
 }
 
 // ── TOAST ──
-let toastTimer;
-function showToast(msg) {
+let toastTmr;
+function toast_show(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => toast.classList.remove('show'), 2400);
 }
 
-// ── CHAT ──
-function addMsg(role, text) {
-  empty.style.display = 'none';
-  const wrap = document.createElement('div');
-  wrap.className = `msg ${role}`;
+// ── MESSAGES ──
+function addUserMsg(text) {
+  emptyState.style.display = 'none';
+  const row = document.createElement('div');
+  row.className = 'row user';
+  row.innerHTML = `<div class="row-label">you</div><div class="bubble">${escHtml(text)}</div>`;
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function createAiBubble() {
+  emptyState.style.display = 'none';
+  const row = document.createElement('div');
+  row.className = 'row ai';
   const lbl = document.createElement('div');
-  lbl.className = 'lbl';
-  lbl.textContent = role === 'user' ? 'YOU' : '🦜 PARAKEET';
+  lbl.className = 'row-label'; lbl.textContent = 'angel';
   const bub = document.createElement('div');
-  bub.className = 'bubble';
-  bub.innerHTML = md(text);
-  wrap.append(lbl, bub);
-  chat.appendChild(wrap);
-  chat.scrollTop = chat.scrollHeight;
+  bub.className = 'bubble streaming';
+  row.append(lbl, bub);
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
   return bub;
 }
 
-function md(t) {
-  return t
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-    .replace(/`([^`]+)`/g,        '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g,  '<strong>$1</strong>')
-    .replace(/\*([^*]+)\*/g,      '<em>$1</em>')
-    .replace(/\n/g,               '<br>');
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ══════════════════════════════════════════════
-//  STREAMING GROQ API
-//  Uses Server-Sent Events (stream: true)
-//  Tokens appear in real-time as they arrive
-// ══════════════════════════════════════════════
+function renderMd(raw) {
+  // Escape first, then apply markdown
+  let t = raw
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Code blocks
+  t = t.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  t = t.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+  // Headers
+  t = t.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  // Bold / italic
+  t = t.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  // HR
+  t = t.replace(/^---$/gm, '<hr>');
+  // Bullet lists
+  t = t.replace(/^[-•] (.+)$/gm, '<li>$1</li>');
+  t = t.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
+  // Numbered lists
+  t = t.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  // Line breaks (not inside pre)
+  t = t.replace(/\n(?!<\/?(pre|ul|li|h3|hr))/g, '<br>');
+  return t;
+}
+
+// ═══════════════════════════════════════
+//  STREAMING GROQ CALL
+// ═══════════════════════════════════════
 async function callGroq(msg) {
   if (!groqKey || busy) return;
   busy = true; setStatus('thinking'); sendBtn.disabled = true;
   history.push({ role: 'user', content: msg });
 
-  // Create AI bubble immediately (empty, streaming)
-  empty.style.display = 'none';
-  const wrap = document.createElement('div');
-  wrap.className = 'msg ai';
-  const lbl = document.createElement('div');
-  lbl.className = 'lbl'; lbl.textContent = '🦜 PARAKEET';
-  const bub = document.createElement('div');
-  bub.className = 'bubble streaming';
-  bub.textContent = '';
-  wrap.append(lbl, bub);
-  chat.appendChild(wrap);
-  chat.scrollTop = chat.scrollHeight;
-
-  let fullReply = '';
+  const bub = createAiBubble();
+  let fullText = '';
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -576,13 +685,13 @@ async function callGroq(msg) {
       },
       body: JSON.stringify({
         model,
+        stream: true,
+        max_tokens: 1500,
+        temperature: 0.65,
         messages: [
-          { role: 'system', content: 'You are Parakeet AI, a brilliant concise assistant. Be sharp and helpful. Use markdown for code.' },
+          { role: 'system', content: CONTEXTS[context] || CONTEXTS.general },
           ...history
-        ],
-        max_tokens: 1024,
-        temperature: 0.7,
-        stream: true   // ← KEY: enable streaming
+        ]
       })
     });
 
@@ -592,44 +701,40 @@ async function callGroq(msg) {
     }
 
     const reader = res.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
+    const dec = new TextDecoder();
+    let buf = '';
 
-    // Read the stream token by token
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
+      buf += dec.decode(value, { stream: true });
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // keep incomplete line
+      const lines = buf.split('\n');
+      buf = lines.pop();
 
       for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed === 'data: [DONE]') continue;
-        if (!trimmed.startsWith('data: ')) continue;
-
+        const l = line.trim();
+        if (!l || l === 'data: [DONE]') continue;
+        if (!l.startsWith('data: ')) continue;
         try {
-          const json = JSON.parse(trimmed.slice(6));
-          const delta = json.choices?.[0]?.delta?.content;
+          const j = JSON.parse(l.slice(6));
+          const delta = j.choices?.[0]?.delta?.content;
           if (delta) {
-            fullReply += delta;
-            // Render markdown incrementally
-            bub.innerHTML = md(fullReply);
-            chat.scrollTop = chat.scrollHeight;
+            fullText += delta;
+            bub.innerHTML = renderMd(fullText);
+            messages.scrollTop = messages.scrollHeight;
           }
         } catch (_) {}
       }
     }
 
-    // Stream complete — remove cursor
     bub.classList.remove('streaming');
-    history.push({ role: 'assistant', content: fullReply });
+    history.push({ role: 'assistant', content: fullText });
 
-  } catch(err) {
+  } catch (err) {
     bub.classList.remove('streaming');
-    bub.innerHTML = `<span style="color:var(--danger)">⚠️ Error: ${err.message}</span>`;
-    showToast(`✗ ${err.message}`);
+    bub.innerHTML = `<span style="color:var(--red)">✗ ${escHtml(err.message)}</span>`;
+    toast_show(`error: ${err.message.slice(0,40)}`);
     history.pop();
   } finally {
     busy = false; setStatus('ready'); sendBtn.disabled = false;
@@ -637,179 +742,185 @@ async function callGroq(msg) {
 }
 
 // ── SEND ──
-function handleSend() {
+function doSend() {
   const t = qInput.value.trim();
   if (!t || busy) return;
-  if (!groqKey) { showToast('✗ Enter your Groq API key first'); return; }
-  addMsg('user', t);
+  if (!groqKey) { toast_show('✗ enter groq key first'); return; }
+  addUserMsg(t);
   qInput.value = ''; qInput.style.height = 'auto';
   callGroq(t);
 }
 
-sendBtn.addEventListener('click', handleSend);
+sendBtn.addEventListener('click', doSend);
 qInput.addEventListener('input', () => {
   qInput.style.height = 'auto';
-  qInput.style.height = Math.min(qInput.scrollHeight, 100) + 'px';
+  qInput.style.height = Math.min(qInput.scrollHeight, 90) + 'px';
 });
 
-// ── CLEAR BUTTON ──
+// ── CLEAR ──
 clearBtn.addEventListener('click', () => {
-  chat.querySelectorAll('.msg').forEach(m => m.remove());
-  history = []; empty.style.display = '';
-  showToast('🗑 Chat cleared');
+  messages.querySelectorAll('.row').forEach(r => r.remove());
+  history = []; emptyState.style.display = '';
+  toast_show('cleared');
 });
 
-// ══════════════════════════════════════════════
-//  STEALTH MODE
-//  Makes the panel invisible to screen-share
-//  Technique: sets window.opacity via CSS class.
-//  When stealth is ON:
-//  - The overlay vanishes when the window loses
-//    focus (i.e., when you switch to share screen)
-//  - You can still see it in your own focused window
-//  - Ctrl+Shift+S toggles
-// ══════════════════════════════════════════════
-function toggleStealth() {
-  stealthMode = !stealthMode;
-  document.body.classList.toggle('stealth-mode', stealthMode);
-  stealthBadge.classList.toggle('on', stealthMode);
-  stealthBtn.style.color = stealthMode ? 'var(--danger)' : '';
-  stealthBtn.style.borderColor = stealthMode ? 'rgba(255,77,109,0.4)' : '';
-  showToast(stealthMode ? '👁 Stealth ON — hidden when unfocused' : '👁 Stealth OFF');
+// ═══════════════════════════════════════
+//  STEALTH SYSTEM
+//
+//  How screen-share invisibility works:
+//  When you share your screen (Zoom, Meet,
+//  Teams, OBS), your browser window typically
+//  loses focus momentarily. We hook into
+//  `window.blur` and `visibilitychange` to
+//  instantly hide the panel at that moment.
+//
+//  For best results: use a separate browser
+//  window just for Angel, and share only your
+//  OTHER window/application, not this one.
+// ═══════════════════════════════════════
+function setStealthMode(on) {
+  stealthOn = on;
+  stealthBtn.classList.toggle('active', on);
+  stealthBtnIcon.textContent = on ? '●' : '○';
+  stealthInd.classList.toggle('stealth-on', on);
+  toast_show(on ? '👁 stealth on — hides on blur' : '○ stealth off');
 }
 
-stealthBtn.addEventListener('click', toggleStealth);
+function setGhostMode(on) {
+  ghostOn = on;
+  panel.classList.toggle('ghost', on);
+  ghostBtn.classList.toggle('active', on);
+  toast_show(on ? 'ghost mode on (15% opacity)' : 'ghost mode off');
+}
 
-// When focus leaves the page in stealth mode, hide overlay
-// This covers most screen-share scenarios where the screen
-// is captured at OS level while the window is unfocused
-document.addEventListener('visibilitychange', () => {
-  if (stealthMode && document.hidden) {
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-  } else if (stealthMode && !document.hidden) {
-    overlay.style.opacity = (opacitySlider.value / 100).toString();
-    overlay.style.pointerEvents = '';
-  }
-});
+stealthBtn.addEventListener('click', () => setStealthMode(!stealthOn));
+ghostBtn.addEventListener('click', () => setGhostMode(!ghostOn));
 
-// Additional: blur event for window focus loss
+// Core stealth hook: hide on window blur
 window.addEventListener('blur', () => {
-  if (stealthMode) {
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
+  if (stealthOn) {
+    panel.style.opacity = '0';
+    panel.style.pointerEvents = 'none';
+    panel.style.transform = 'scale(0.99)';
   }
 });
 window.addEventListener('focus', () => {
-  if (stealthMode) {
-    overlay.style.opacity = (opacitySlider.value / 100).toString();
-    overlay.style.pointerEvents = '';
+  if (stealthOn) {
+    panel.style.opacity = '';
+    panel.style.pointerEvents = '';
+    panel.style.transform = '';
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (!stealthOn) return;
+  if (document.hidden) {
+    panel.style.opacity = '0';
+    panel.style.pointerEvents = 'none';
+  } else {
+    panel.style.opacity = '';
+    panel.style.pointerEvents = '';
   }
 });
 
 // ── KEYBOARD SHORTCUTS ──
 document.addEventListener('keydown', e => {
-  // Ctrl+Shift+H → hide/show
+  // Ctrl+Shift+H: toggle visibility
   if (e.ctrlKey && e.shiftKey && e.key === 'H') {
     e.preventDefault();
-    overlayVisible = !overlayVisible;
-    overlay.classList.toggle('hidden', !overlayVisible);
-    if (overlayVisible) showToast('👁 Panel shown');
+    visible = !visible;
+    panel.classList.toggle('hide', !visible);
+    if (visible) toast_show('panel visible');
   }
-  // Ctrl+Shift+S → stealth mode
+  // Ctrl+Shift+S: stealth
   if (e.ctrlKey && e.shiftKey && e.key === 'S') {
-    e.preventDefault();
-    toggleStealth();
+    e.preventDefault(); setStealthMode(!stealthOn);
   }
-  // Ctrl+Enter → send
+  // Ctrl+Shift+G: ghost
+  if (e.ctrlKey && e.shiftKey && e.key === 'G') {
+    e.preventDefault(); setGhostMode(!ghostOn);
+  }
+  // Ctrl+Enter: send
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    e.preventDefault(); handleSend();
+    e.preventDefault(); doSend();
   }
-  // Ctrl+Shift+C → clear
+  // Ctrl+Shift+C: clear
   if (e.ctrlKey && e.shiftKey && e.key === 'C') {
     e.preventDefault();
-    chat.querySelectorAll('.msg').forEach(m => m.remove());
-    history = []; empty.style.display = '';
-    showToast('🗑 Chat cleared');
+    messages.querySelectorAll('.row').forEach(r => r.remove());
+    history = []; emptyState.style.display = '';
+    toast_show('cleared');
   }
-  // Escape → clear input
-  if (e.key === 'Escape' && qInput.value) {
+  // Esc: clear input
+  if (e.key === 'Escape') {
     qInput.value = ''; qInput.style.height = 'auto';
   }
 });
 
-// ── DRAG (titlebar) ──
-const titlebar = document.getElementById('titlebar');
+// ── DRAG ──
+const topbar = document.getElementById('topbar');
 let drag = null;
 
-titlebar.addEventListener('mousedown', e => {
-  // Don't drag on buttons/slider
-  if (e.target.closest('button, input')) return;
-  const r = overlay.getBoundingClientRect();
-  drag = { sx: e.clientX, sy: e.clientY, ol: r.left, ot: r.top };
+topbar.addEventListener('mousedown', e => {
+  if (e.target.closest('button')) return;
+  const r = panel.getBoundingClientRect();
+  drag = { ox: e.clientX - r.left, oy: e.clientY - r.top };
+  panel.style.transition = 'opacity 0.18s ease';
   document.body.style.userSelect = 'none';
-  overlay.style.transition = 'none';
 });
-
 document.addEventListener('mousemove', e => {
   if (!drag) return;
-  const nx = drag.ol + (e.clientX - drag.sx);
-  const ny = drag.ot + (e.clientY - drag.sy);
-  overlay.style.left = Math.max(0, Math.min(window.innerWidth - 200, nx)) + 'px';
-  overlay.style.top  = Math.max(0, Math.min(window.innerHeight - 100, ny)) + 'px';
-  overlay.style.right = 'auto';
+  const x = e.clientX - drag.ox;
+  const y = e.clientY - drag.oy;
+  panel.style.left = Math.max(0, Math.min(window.innerWidth - 200, x)) + 'px';
+  panel.style.top  = Math.max(0, Math.min(window.innerHeight - 100, y)) + 'px';
+  panel.style.right = 'auto';
 });
-
 document.addEventListener('mouseup', () => {
-  drag = null;
-  document.body.style.userSelect = '';
-  overlay.style.transition = '';
+  drag = null; document.body.style.userSelect = '';
 });
 
-// ── SPEECH RECOGNITION ──
+// ── SPEECH ──
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (!SR) { micBtn.style.opacity = '0.35'; micBtn.title = 'Use Chrome/Edge for voice'; }
+if (!SR) { micBtn.style.opacity = '0.3'; micBtn.title = 'Use Chrome/Edge for voice'; }
 
-function initSpeech() {
+function initSR() {
   recog = new SR();
   recog.continuous = false; recog.interimResults = true; recog.lang = 'en-US';
-
   recog.onstart = () => {
-    listening = true; micBtn.classList.add('on'); micBtn.textContent = '⏹️';
-    setStatus('listening'); showToast('🎙️ Listening…');
-    clearTimeout(autoTimer);
+    listening = true; micBtn.classList.add('on'); micBtn.textContent = '⏹';
+    setStatus('listening'); toast_show('🎙 listening…'); clearTimeout(autoTimer);
   };
   recog.onresult = e => {
-    let final = '', interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
+    let f = '', i = '';
+    for (let n = e.resultIndex; n < e.results.length; n++) {
+      if (e.results[n].isFinal) f += e.results[n][0].transcript;
+      else i += e.results[n][0].transcript;
     }
-    qInput.value = (final || interim).trim();
+    qInput.value = (f || i).trim();
     qInput.style.height = 'auto';
-    qInput.style.height = Math.min(qInput.scrollHeight, 100) + 'px';
+    qInput.style.height = Math.min(qInput.scrollHeight, 90) + 'px';
   };
   recog.onend = () => {
-    listening = false; micBtn.classList.remove('on'); micBtn.textContent = '🎙️';
+    listening = false; micBtn.classList.remove('on'); micBtn.textContent = '🎙';
     setStatus('ready');
     if (qInput.value.trim()) {
-      showToast(`⚡ Auto-send in ${AUTO_DELAY/1000}s…`);
-      autoTimer = setTimeout(handleSend, AUTO_DELAY);
+      toast_show(`auto-send in ${AUTO_MS/1000}s…`);
+      autoTimer = setTimeout(doSend, AUTO_MS);
     }
   };
   recog.onerror = e => {
-    listening = false; micBtn.classList.remove('on'); micBtn.textContent = '🎙️';
+    listening = false; micBtn.classList.remove('on'); micBtn.textContent = '🎙';
     setStatus('ready');
-    if (e.error !== 'aborted') showToast(`✗ Mic: ${e.error}`);
+    if (e.error !== 'aborted') toast_show(`mic error: ${e.error}`);
     clearTimeout(autoTimer);
   };
 }
 
 micBtn.addEventListener('click', () => {
-  if (!SR) { showToast('✗ Use Chrome or Edge for voice'); return; }
-  if (!recog) initSpeech();
+  if (!SR) { toast_show('use Chrome/Edge for voice'); return; }
+  if (!recog) initSR();
   if (listening) { recog.stop(); clearTimeout(autoTimer); }
-  else { clearTimeout(autoTimer); try { recog.start(); } catch(e) { initSpeech(); setTimeout(()=>recog.start(),80); } }
+  else { clearTimeout(autoTimer); try { recog.start(); } catch(e) { initSR(); setTimeout(()=>recog.start(), 80); } }
 });
 </script>
 </body>
